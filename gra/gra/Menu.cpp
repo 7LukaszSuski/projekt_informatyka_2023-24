@@ -19,7 +19,7 @@ MainMenu::MainMenu(float width, float height) {
 
 	mainMenu[2].setFont(font);
 	mainMenu[2].setFillColor(Color::White);
-	mainMenu[2].setString("O mnie");
+	mainMenu[2].setString("O grze");
 	mainMenu[2].setCharacterSize(80);
 	mainMenu[2].setPosition(50, 450);
 

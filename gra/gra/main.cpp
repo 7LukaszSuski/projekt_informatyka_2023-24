@@ -78,7 +78,7 @@ public:
 	vector<Bullet2> bullets2;
 
 	Player2(Texture* texture) {
-		this->HP2Max = 10;
+		this->HP2Max = 5;
 		this->HP2 = this->HP2Max;
 
 		this->texture = texture;
@@ -569,7 +569,7 @@ int main() {
 	RectangleShape background;
 	background.setSize(Vector2f(960, 720));
 	Texture Maintexture;
-	Maintexture.loadFromFile("Texture/menu.jpg");
+	Maintexture.loadFromFile("Texture/menuBgc.jpg");
 	background.setTexture(&Maintexture);
 
 	RectangleShape Obgc;
