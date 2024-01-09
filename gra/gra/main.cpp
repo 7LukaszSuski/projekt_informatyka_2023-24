@@ -324,7 +324,7 @@ void runDuo(RenderWindow& duoWindow) {
 			if (player.HP > 0)
 				hpText.setString("G1 HP: " + to_string(player.HP));
 			else {
-				hpText.setString("G1 HP: 0");
+				hpText.setString("Gracz 1 odpada!");
 				player.shape.setPosition(-1000.f, 100.f);
 				shootTimer = 0;
 			}
@@ -333,7 +333,7 @@ void runDuo(RenderWindow& duoWindow) {
 			if (player2.HP2 > 0)
 				hp2Text.setString("G2 HP: " + to_string(player2.HP2));
 			else {
-				hp2Text.setString("G2 HP: 0");
+				hp2Text.setString("Gracz 2 odpada!");
 				player2.shape.setPosition(-1000.f, 100.f);
 				shoot2Timer = 0;
 			}
@@ -397,6 +397,18 @@ void runGame(RenderWindow& gameWindow) {
 		Maintexture.loadFromFile("Texture/soloBgc.png");
 		background.setTexture(&Maintexture);
 
+		RectangleShape pauseBgc;
+		pauseBgc.setSize(Vector2f(960, 720));
+		Texture pauseTxt;
+		pauseTxt.loadFromFile("Texture/pauseBgc.png");
+		pauseBgc.setTexture(&pauseTxt);
+
+		RectangleShape closeBgc;
+		closeBgc.setSize(Vector2f(960, 720));
+		Texture closeTxt;
+		closeTxt.loadFromFile("Texture/pauseBgc.png");
+		closeBgc.setTexture(&closeTxt);
+
 		Font font;
 		font.loadFromFile("Fonts/Emulogic-zrEw.ttf");
 
@@ -441,6 +453,22 @@ void runGame(RenderWindow& gameWindow) {
 		int enemySpawnTimer = 0;
 		vector<Enemy> enemies;
 
+		Text pauseHpText;
+		pauseHpText.setFont(font);
+		pauseHpText.setCharacterSize(30);
+		pauseHpText.setFillColor(Color::White);
+		pauseHpText.setPosition(100.f, (gameWindow.getSize().y / 2) + 100);
+
+		//pauza 1
+		bool isPaused = false;
+		Text pauseText;
+		pauseText.setFont(font);
+		pauseText.setCharacterSize(30);
+		pauseText.setFillColor(Color::White);
+		pauseText.setPosition(100.f, 150.f);
+		pauseText.setString("GRA ZATRZYMANA. \nNacisnij F1, aby wznowic.");
+		// 1 pauza
+
 		while (gameWindow.isOpen())
 		{
 			Event event;
@@ -452,108 +480,122 @@ void runGame(RenderWindow& gameWindow) {
 					if (event.key.code == Keyboard::Escape) {
 						gameWindow.close();
 					}
+					else if (event.key.code == Keyboard::F1) {
+						isPaused = !isPaused;
+					}
 				}
 			}
+			if (!isPaused) {
+				if (player.HP > 0) {
 
-			if (player.HP > 0) {
+					if (Keyboard::isKeyPressed(Keyboard::W))
+						player.shape.move(0.f, -8.f);
+					if (Keyboard::isKeyPressed(Keyboard::S))
+						player.shape.move(0.f, 8.f);
+					if (Keyboard::isKeyPressed(Keyboard::A))
+						player.shape.move(-8.f, 0.f);
+					if (Keyboard::isKeyPressed(Keyboard::D))
+						player.shape.move(8.f, 0.f);
 
-				if (Keyboard::isKeyPressed(Keyboard::W))
-					player.shape.move(0.f, -8.f);
-				if (Keyboard::isKeyPressed(Keyboard::S))
-					player.shape.move(0.f, 8.f);
-				if (Keyboard::isKeyPressed(Keyboard::A))
-					player.shape.move(-8.f, 0.f);
-				if (Keyboard::isKeyPressed(Keyboard::D))
-					player.shape.move(8.f, 0.f);
+					if (player.shape.getPosition().x <= 0)
+						player.shape.setPosition(0.f, player.shape.getPosition().y);
+					if (player.shape.getPosition().x >= gameWindow.getSize().x - player.shape.getGlobalBounds().width)
+						player.shape.setPosition(gameWindow.getSize().x - player.shape.getGlobalBounds().width, player.shape.getPosition().y);
+					if (player.shape.getPosition().y <= 0)
+						player.shape.setPosition(player.shape.getPosition().x, 0.f);
+					if (player.shape.getPosition().y >= gameWindow.getSize().y - player.shape.getGlobalBounds().height)
+						player.shape.setPosition(player.shape.getPosition().x, gameWindow.getSize().y - player.shape.getGlobalBounds().height);
 
-				if (player.shape.getPosition().x <= 0)
-					player.shape.setPosition(0.f, player.shape.getPosition().y);
-				if (player.shape.getPosition().x >= gameWindow.getSize().x - player.shape.getGlobalBounds().width)
-					player.shape.setPosition(gameWindow.getSize().x - player.shape.getGlobalBounds().width, player.shape.getPosition().y);
-				if (player.shape.getPosition().y <= 0)
-					player.shape.setPosition(player.shape.getPosition().x, 0.f);
-				if (player.shape.getPosition().y >= gameWindow.getSize().y - player.shape.getGlobalBounds().height)
-					player.shape.setPosition(player.shape.getPosition().x, gameWindow.getSize().y - player.shape.getGlobalBounds().height);
+					if (shootTimer < 40)
+						shootTimer++;
 
-				if (shootTimer < 40)
-					shootTimer++;
-
-				if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer >= 20) {
-					player.bullets.push_back(Bullet(&bulletTex, player.shape.getPosition()));
-					shootTimer = 0;
-				}
-
-				for (size_t i = 0; i < player.bullets.size(); i++)
-				{
-					player.bullets[i].shape.move(8.f, 0.f);
-
-					if (player.bullets[i].shape.getPosition().x > gameWindow.getSize().x) {
-						player.bullets.erase(player.bullets.begin() + i);
-						break;
+					if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer >= 20) {
+						player.bullets.push_back(Bullet(&bulletTex, player.shape.getPosition()));
+						shootTimer = 0;
 					}
 
-					for (size_t k = 0; k < enemies.size(); k++)
+					for (size_t i = 0; i < player.bullets.size(); i++)
 					{
-						if (player.bullets[i].shape.getGlobalBounds().intersects(enemies[k].shape.getGlobalBounds())) {
-							if (enemies[k].HP <= 1) {
-								score += 5;
-								enemies.erase(enemies.begin() + k);
-							}
-							else
-								enemies[k].HP--;
+						player.bullets[i].shape.move(8.f, 0.f);
+
+						if (player.bullets[i].shape.getPosition().x > gameWindow.getSize().x) {
 							player.bullets.erase(player.bullets.begin() + i);
 							break;
 						}
+
+						for (size_t k = 0; k < enemies.size(); k++)
+						{
+							if (player.bullets[i].shape.getGlobalBounds().intersects(enemies[k].shape.getGlobalBounds())) {
+								if (enemies[k].HP <= 1) {
+									score += 5;
+									enemies.erase(enemies.begin() + k);
+								}
+								else
+									enemies[k].HP--;
+								player.bullets.erase(player.bullets.begin() + i);
+								break;
+							}
+						}
 					}
+
+					if (enemySpawnTimer < 25)
+						enemySpawnTimer++;
+
+					if (enemySpawnTimer >= 25) {
+						enemies.push_back(Enemy(&enemyTex, gameWindow.getSize()));
+						enemySpawnTimer = 0;
+					}
+					for (size_t i = 0; i < enemies.size(); i++)
+					{
+						enemies[i].shape.move(-5.f, 0.f);
+						if (enemies[i].shape.getPosition().x <= 0 - enemies[i].shape.getGlobalBounds().width) {
+							enemies.erase(enemies.begin() + i);
+							break;
+						}
+						if (enemies[i].shape.getGlobalBounds().intersects(player.shape.getGlobalBounds())) {
+							enemies.erase(enemies.begin() + i);
+							player.HP--;
+							break;
+						}
+					}
+
+					hpText.setString("HP: " + to_string(player.HP));
+					scoreText.setString("Score: " + to_string(score));
+					gameScore.setString("Twoj wynik: " + to_string(score));
+				}
+				gameWindow.clear();
+				gameWindow.draw(background);
+				gameWindow.draw(player.shape);
+				for (size_t i = 0; i < player.bullets.size(); i++) {
+					gameWindow.draw(player.bullets[i].shape);
 				}
 
-				if (enemySpawnTimer < 25)
-					enemySpawnTimer++;
-
-				if (enemySpawnTimer >= 25) {
-					enemies.push_back(Enemy(&enemyTex, gameWindow.getSize()));
-					enemySpawnTimer = 0;
-				}
 				for (size_t i = 0; i < enemies.size(); i++)
 				{
-					enemies[i].shape.move(-5.f, 0.f);
-					if (enemies[i].shape.getPosition().x <= 0 - enemies[i].shape.getGlobalBounds().width) {
-						enemies.erase(enemies.begin() + i);
-						break;
-					}
-					if (enemies[i].shape.getGlobalBounds().intersects(player.shape.getGlobalBounds())) {
-						enemies.erase(enemies.begin() + i);
-						player.HP--;
-						break;
-					}
+					gameWindow.draw(enemies[i].shape);
 				}
 
-				hpText.setString("HP: " + to_string(player.HP));
-				scoreText.setString("Score: " + to_string(score));
-				gameScore.setString("Twoj wynik: " + to_string(score));
+				gameWindow.draw(scoreText);
+				gameWindow.draw(hpText);
+
+
+				if (player.HP <= 0) {
+					gameWindow.draw(gameOverText);
+					gameWindow.draw(gameScore);
+				}
+				if (Keyboard::isKeyPressed(Keyboard::Escape))
+					gameWindow.close();
+				
 			}
-			gameWindow.clear();
-			gameWindow.draw(background);
-			gameWindow.draw(player.shape);
-			for (size_t i = 0; i < player.bullets.size(); i++) {
-				gameWindow.draw(player.bullets[i].shape);
-			}
-
-			for (size_t i = 0; i < enemies.size(); i++)
-			{
-				gameWindow.draw(enemies[i].shape);
-			}
-
-			gameWindow.draw(scoreText);
-			gameWindow.draw(hpText);
-
-
-			if (player.HP <= 0) {
-				gameWindow.draw(gameOverText);
+			else {
+				gameWindow.clear();
+				gameWindow.setTitle("HELP");
+				gameWindow.draw(pauseBgc);
+				pauseHpText.setString("Twoje aktualne HP: " + to_string(player.HP));
+				gameWindow.draw(pauseHpText);
 				gameWindow.draw(gameScore);
+				gameWindow.draw(pauseText);
 			}
-			if (Keyboard::isKeyPressed(Keyboard::Escape))
-				gameWindow.close();
 
 			gameWindow.display();
 		}
