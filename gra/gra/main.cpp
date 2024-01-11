@@ -192,6 +192,7 @@ void enemyCollision(Player& player, Player2& player2, vector<Enemy>& enemies, Re
 //Tryb gry: SOLO
 void runGame(RenderWindow& gameWindow, Resources resources) {
 
+	srand(time(NULL));
 	gameWindow.setFramerateLimit(60);
 
 	RectangleShape background;
@@ -216,10 +217,9 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 	bool isPaused = false;
 	bool isClosed = false;
 
-	music.setVolume(1.f);
+	resources.shoot.setVolume(10);
+	music.setVolume(1);
 	music.play();
-
-	resources.shoot.setVolume(10.f);
 
 	while (gameWindow.isOpen())
 	{
@@ -240,7 +240,6 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 		if (!isClosed) {
 			if (!isPaused) {
 				if (player.HP > 0) {
-					
 					gameWindow.setTitle("SOLO Space Invaders");
 					playerMovement(player, gameWindow);
 					shooting(player, shootTimer, enemies, score, resources, gameWindow);
@@ -250,12 +249,12 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 					resources.hpText.setString("HP: " + to_string(player.HP));
 					resources.scoreText.setString("Score: " + to_string(score));
 					resources.gameScoreText.setString("Twoj wynik: " + to_string(score));
-
-
 				}
 				gameWindow.clear();
 				gameWindow.draw(background);
 				gameWindow.draw(player.shape);
+				gameWindow.draw(resources.scoreText);
+				gameWindow.draw(resources.hpText);
 
 				//Rysowanie pocisków
 				for (size_t i = 0; i < player.bullets.size(); i++) {
@@ -267,25 +266,20 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 				{
 					gameWindow.draw(enemies[i].shape);
 				}
-
-				gameWindow.draw(resources.scoreText);
-				gameWindow.draw(resources.hpText);
-
-
+				//Koniec gry Gracz 1 odpadl
 				if (player.HP <= 0) {
-
 					music.pause();
+					resources.hpText.setString("");
+					resources.scoreText.setString("");
 					gameWindow.draw(resources.gameOverText);
 					gameWindow.draw(resources.gameScoreText);
-					resources.hpText.setString("");
-					gameWindow.draw(resources.hp2Text);
 				}
 			}
 			else {
 				gameWindow.clear();
+				resources.pauseHpText.setString("Twoje aktualne HP: " + to_string(player.HP));
 				gameWindow.setTitle("HELP");
 				gameWindow.draw(pauseBgc);
-				resources.pauseHpText.setString("Twoje aktualne HP: " + to_string(player.HP));
 				gameWindow.draw(resources.pauseHpText);
 				gameWindow.draw(resources.gameScoreText);
 				gameWindow.draw(resources.pauseText);
@@ -334,15 +328,13 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 
 	vector<Enemy> enemies;
 
-	music2.setVolume(10.f);
+	resources.shoot.setVolume(0);
+	music2.setVolume(10);
 	music2.play();
-
-	resources.shoot.setVolume(0.f);
 
 	while (duoWindow.isOpen())
 	{
 		Event event;
-
 		while (duoWindow.pollEvent(event))
 		{
 			if (event.type == Event::Closed)
@@ -361,7 +353,7 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 			if (player.HP > 0)
 				resources.hpText.setString("G1 HP: " + to_string(player.HP));
 			else {
-				resources.hpText.setString("Gracz 1 odpada!");
+				resources.hpText.setString("Gracz 1 odpadl!");
 				player.shape.setPosition(-1000.f, 100.f);
 				shootTimer = 0;
 			}
@@ -370,35 +362,38 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 			if (player2.HP2 > 0)
 				resources.hp2Text.setString("G2 HP: " + to_string(player2.HP2));
 			else {
-				resources.hp2Text.setString("Gracz 2 odpada!");
+				resources.hp2Text.setString("Gracz 2 odpadl!");
 				player2.shape.setPosition(-1000.f, 100.f);
 				shoot2Timer = 0;
 			}
 			resources.score2Text.setString("G2 Score: " + to_string(score2));
 		}
+
 		duoWindow.clear();
 		duoWindow.draw(background);
 		duoWindow.draw(player.shape);
 		duoWindow.draw(player2.shape);
-
+		duoWindow.draw(resources.scoreText);
+		duoWindow.draw(resources.hpText);
+		duoWindow.draw(resources.score2Text);
+		duoWindow.draw(resources.hp2Text);
+		//Rysowanie pocisków Gracza 1
 		for (size_t i = 0; i < player.bullets.size(); i++) {
 			duoWindow.draw(player.bullets[i].shape);
 		}
 
+		//Rysowanie pocisków Gracza 2
 		for (size_t i = 0; i < player2.bullets2.size(); i++) {
 			duoWindow.draw(player2.bullets2[i].shape);
 		}
 
+		//Rysowanie przeciwników
 		for (size_t i = 0; i < enemies.size(); i++)
 		{
 			duoWindow.draw(enemies[i].shape);
 		}
 
-		duoWindow.draw(resources.scoreText);
-		duoWindow.draw(resources.hpText);
-		duoWindow.draw(resources.score2Text);
-		duoWindow.draw(resources.hp2Text);
-
+		//Koniec gry Gracz 1 i Gracz 2 odpadli
 		if (player.HP <= 0 && player2.HP2 <= 0) {
 			music2.pause();
 			duoWindow.draw(resources.gameOverText);
@@ -417,10 +412,8 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 			duoWindow.close();
 			return;
 		}
-
 		duoWindow.display();
 	}
-
 }
 //end 3
 

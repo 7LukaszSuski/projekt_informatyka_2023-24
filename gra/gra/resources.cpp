@@ -27,25 +27,25 @@ Resources::Resources() {
 	gameOverText.setFont(font);
 	gameOverText.setCharacterSize(30);
 	gameOverText.setFillColor(Color::Red);
-	gameOverText.setPosition(100.f, 720.f / 2);
+	gameOverText.setPosition(960.f / 4, (720.f / 2) - 100.f);
 	gameOverText.setString("GRA SKONCZONA!");
 
 	playerWinsText.setFont(font);
 	playerWinsText.setCharacterSize(30);
 	playerWinsText.setFillColor(Color::Yellow);
-	playerWinsText.setPosition(100.f, (720.f / 2) + 100.f);
+	playerWinsText.setPosition(960.f / 4, (720.f / 2) - 50.f);
 	playerWinsText.setString("GRACZ 1 WYGRAL!");
 
 	player2WinsText.setFont(font);
 	player2WinsText.setCharacterSize(30);
 	player2WinsText.setFillColor(Color::Yellow);
-	player2WinsText.setPosition(100.f, (720.f / 2) + 100.f);
+	player2WinsText.setPosition(960.f / 4, (720.f / 2) - 50.f);
 	player2WinsText.setString("GRACZ 2 WYGRAL!");
 
 	resultDrawText.setFont(font);
 	resultDrawText.setCharacterSize(30);
 	resultDrawText.setFillColor(Color::Yellow);
-	resultDrawText.setPosition(100.f, (720.f / 2) + 100.f);
+	resultDrawText.setPosition(960.f / 4, (720.f / 2) - 50.f);
 	resultDrawText.setString("REMIS!");
 
 	hpText.setFont(font);
@@ -61,7 +61,7 @@ Resources::Resources() {
 	gameScoreText.setFont(font);
 	gameScoreText.setCharacterSize(30);
 	gameScoreText.setFillColor(Color::Yellow);
-	gameScoreText.setPosition(100.f, (720.f / 2) + 50);
+	gameScoreText.setPosition((960.f / 4), (720.f / 2) - 50.f);
 
 	pauseHpText.setFont(font);
 	pauseHpText.setCharacterSize(30);
