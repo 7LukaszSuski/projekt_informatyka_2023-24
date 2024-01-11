@@ -1,14 +1,14 @@
 #pragma once
-
 #include <SFML/Graphics.hpp>
+using namespace sf;
 
 class AboutMe {
 public:
     AboutMe(float width, float height);
 
-    void draw(sf::RenderWindow& window);
+    void draw(RenderWindow& window);
 
 private:
-    sf::Font font;
-    sf::Text aboutText;
+    Font font;
+    Text aboutText;
 };

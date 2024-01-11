@@ -16,7 +16,7 @@ public:
 	int MainMenuPressed() {
 		return MainMenuSelected;
 	}
-	~MainMenu();	
+	
 private:
 	int MainMenuSelected;
 	Font font;
