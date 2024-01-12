@@ -24,7 +24,7 @@ void playerMovement(Player& player, RenderWindow& window) {
 	if (Keyboard::isKeyPressed(Keyboard::D))
 		player.shape.move(8.f, 0.f);
 
-	//Sprawdzenie czy Gracz 1 wychodzi poza ekran
+	//Sprawdzenie czy Gracz 1 wychodzi poza ekran, jeœli tak to ustawia go przy krawêdzi 
 	if (player.shape.getPosition().x <= 0)
 		player.shape.setPosition(0.f, player.shape.getPosition().y);
 	if (player.shape.getPosition().x >= window.getSize().x - player.shape.getGlobalBounds().width)
@@ -47,7 +47,7 @@ void player2Movement(Player2& player2, RenderWindow& window) {
 	if (Keyboard::isKeyPressed(Keyboard::L))
 		player2.shape.move(8.f, 0.f);
 
-	//Sprawdzenie czy Gracz 2 wychodzi poza ekran
+	//Sprawdzenie czy Gracz 2 wychodzi poza ekran, jeœli tak to ustawia go przy krawêdzi
 	if (player2.shape.getPosition().x <= 0)
 		player2.shape.setPosition(0.f, player2.shape.getPosition().y);
 	if (player2.shape.getPosition().x >= window.getSize().x - player2.shape.getGlobalBounds().width)
@@ -59,15 +59,15 @@ void player2Movement(Player2& player2, RenderWindow& window) {
 }
 
 //Strzelanie Gracz 1
-void shooting(Player& player, int& shootTimer, vector<Enemy>& enemies, int& score, Resources& resources, RenderWindow& window) {
+void shooting(Player& player, int& shootCooldown, vector<Enemy>& enemies, int& score, Resources& resources, RenderWindow& window) {
 
-	if (shootTimer < 20)
-		shootTimer++;
+	if (shootCooldown < 20)
+		shootCooldown++;
 
-	if (Keyboard::isKeyPressed(Keyboard::Space) && shootTimer >= 20) {
+	if (Keyboard::isKeyPressed(Keyboard::Space) && shootCooldown >= 20) {
 		resources.shoot.play();
 		player.bullets.push_back(Bullet(&resources.bulletTxt, player.shape.getPosition()));
-		shootTimer = 0;
+		shootCooldown = 0;
 	}
 
 	for (size_t i = 0; i < player.bullets.size(); i++)
@@ -99,14 +99,14 @@ void shooting(Player& player, int& shootTimer, vector<Enemy>& enemies, int& scor
 }
 
 //Strzelanie Gracz 2
-void shooting2(Player2& player2, int& shoot2Timer, vector<Enemy>& enemies, int& score2, Resources& resources, RenderWindow& window) {
+void shooting2(Player2& player2, int& shoot2Cooldown, vector<Enemy>& enemies, int& score2, Resources& resources, RenderWindow& window) {
 
-	if (shoot2Timer < 20)
-		shoot2Timer++;
+	if (shoot2Cooldown < 20)
+		shoot2Cooldown++;
 
-	if (Keyboard::isKeyPressed(Keyboard::Return) && shoot2Timer >= 20) {
+	if (Keyboard::isKeyPressed(Keyboard::Return) && shoot2Cooldown >= 20) {
 		player2.bullets2.push_back(Bullet2(&resources.bullet2Txt, player2.shape.getPosition()));
-		shoot2Timer = 0;
+		shoot2Cooldown = 0;
 	}
 
 	for (size_t i = 0; i < player2.bullets2.size(); i++)
@@ -136,15 +136,15 @@ void shooting2(Player2& player2, int& shoot2Timer, vector<Enemy>& enemies, int& 
 }
 
 //Pojawianie siê przeciwników
-void enemySpawn(vector<Enemy>& enemies, Resources& resources, int& enemySpawnTimer, RenderWindow& window) {
+void enemySpawn(vector<Enemy>& enemies, Resources& resources, int& enemySpawnCooldown, RenderWindow& window) {
 
-	if (enemySpawnTimer < 25)
-		enemySpawnTimer++;
+	if (enemySpawnCooldown < 25)
+		enemySpawnCooldown++;
 
-	if (enemySpawnTimer >= 25) {
+	if (enemySpawnCooldown >= 25) {
 		//Pojawianie siê przeciwników po prawej stronie okna
 		enemies.push_back(Enemy(&resources.enemyTxt, window.getSize()));
-		enemySpawnTimer = 0;
+		enemySpawnCooldown = 0;
 	}
 }
 
@@ -210,8 +210,8 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 	music.openFromFile("MP3/unity.ogg");
 
 	int score = 0;
-	int shootTimer = 20;
-	int enemySpawnTimer = 0;
+	int shootCooldown = 20;
+	int enemySpawnCooldown = 0;
 	vector<Enemy> enemies;
 
 	bool isPaused = false;
@@ -242,8 +242,8 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 				if (player.HP > 0) {
 					gameWindow.setTitle("SOLO Space Invaders");
 					playerMovement(player, gameWindow);
-					shooting(player, shootTimer, enemies, score, resources, gameWindow);
-					enemySpawn(enemies, resources, enemySpawnTimer, gameWindow);
+					shooting(player, shootCooldown, enemies, score, resources, gameWindow);
+					enemySpawn(enemies, resources, enemySpawnCooldown, gameWindow);
 					enemyCollisionSolo(player, enemies, resources, score);
 
 					resources.hpText.setString("HP: " + to_string(player.HP));
@@ -261,12 +261,13 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 					gameWindow.draw(player.bullets[i].shape);
 				}
 
-				//Rysowanie wrogów
+				//Rysowanie przeciwników
 				for (size_t i = 0; i < enemies.size(); i++)
 				{
 					gameWindow.draw(enemies[i].shape);
 				}
-				//Koniec gry Gracz 1 odpadl
+
+				//Gracz 1 odpadl - Koniec gry
 				if (player.HP <= 0) {
 					music.pause();
 					resources.hpText.setString("");
@@ -275,6 +276,7 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 					gameWindow.draw(resources.gameScoreText);
 				}
 			}
+			//Okno pauzy F1
 			else {
 				gameWindow.clear();
 				resources.pauseHpText.setString("Twoje aktualne HP: " + to_string(player.HP));
@@ -285,6 +287,7 @@ void runGame(RenderWindow& gameWindow, Resources resources) {
 				gameWindow.draw(resources.pauseText);
 			}
 		}
+		//Okno zamkniecia ESC
 		else {
 			gameWindow.clear();
 			gameWindow.setTitle("ESC");
@@ -320,11 +323,9 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 
 	int score = 0;
 	int score2 = 0;
-
-	int shootTimer = 20;
-	int shoot2Timer = 20;
-
-	int enemySpawnTimer = 0;
+	int shootCooldown = 20;
+	int shoot2Cooldown = 20;
+	int enemySpawnCooldown = 0;
 
 	vector<Enemy> enemies;
 
@@ -345,9 +346,9 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 
 			playerMovement(player, duoWindow);
 			player2Movement(player2, duoWindow);
-			shooting(player, shootTimer, enemies, score, resources, duoWindow);
-			shooting2(player2, shoot2Timer, enemies, score2, resources, duoWindow);
-			enemySpawn(enemies, resources, enemySpawnTimer, duoWindow);
+			shooting(player, shootCooldown, enemies, score, resources, duoWindow);
+			shooting2(player2, shoot2Cooldown, enemies, score2, resources, duoWindow);
+			enemySpawn(enemies, resources, enemySpawnCooldown, duoWindow);
 			enemyCollision(player, player2, enemies, resources, score, score2);
 
 			if (player.HP > 0)
@@ -355,7 +356,7 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 			else {
 				resources.hpText.setString("Gracz 1 odpadl!");
 				player.shape.setPosition(-1000.f, 100.f);
-				shootTimer = 0;
+				shootCooldown = 0;
 			}
 			resources.scoreText.setString("G1 Score: " + to_string(score));
 
@@ -364,7 +365,7 @@ void runDuo(RenderWindow& duoWindow, Resources& resources) {
 			else {
 				resources.hp2Text.setString("Gracz 2 odpadl!");
 				player2.shape.setPosition(-1000.f, 100.f);
-				shoot2Timer = 0;
+				shoot2Cooldown = 0;
 			}
 			resources.score2Text.setString("G2 Score: " + to_string(score2));
 		}
